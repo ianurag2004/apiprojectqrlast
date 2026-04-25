@@ -153,7 +153,7 @@ export default function ChatBot() {
             </div>
             <div className="text-[10px] text-emerald-400 flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse" />
-              Powered by Gemini
+              Powered by Claude
             </div>
           </div>
           <div className="flex gap-1">

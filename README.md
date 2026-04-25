@@ -53,8 +53,8 @@ JWT_REFRESH_SECRET=your_refresh_secret
 REDIS_URL=redis://localhost:6379
 CLIENT_URL=http://localhost:5173
 
-# Google Gemini AI (free key from https://aistudio.google.com/app/apikey)
-GEMINI_API_KEY=your_gemini_api_key
+# Anthropic Claude AI (get key from https://console.anthropic.com/)
+CLAUDE_API_KEY=your_claude_api_key_here
 
 # Razorpay (test keys from https://dashboard.razorpay.com/app/keys)
 RAZORPAY_KEY_ID=rzp_test_your_key
@@ -158,7 +158,7 @@ All demo accounts use password: **`demo1234`**
 | Database | MongoDB + Mongoose |
 | Cache | Redis (ioredis) — optional |
 | Auth | JWT (access 15min + refresh 7d) |
-| AI Chatbot | Google Gemini API |
+| AI Chatbot | Anthropic Claude (claude-opus-4-5) |
 | Payments | Razorpay |
 | QR Codes | qrcode (npm) |
 

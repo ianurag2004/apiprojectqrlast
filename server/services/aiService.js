@@ -1,6 +1,6 @@
 /**
- * FestOS AI Service — powered by Google Gemini API
- * Replaces the Python/Flask/scikit-learn ai-service microservice.
+ * FestOS AI Service — powered by Anthropic Claude API
+ * Provides analytics predictions with formula-based fallbacks.
  *
  * Exports the same 4 functions as the old aiProxy.js:
  *   predictTurnout(payload)
@@ -12,39 +12,36 @@
  * or the Gemini call fails, so the app always works.
  */
 
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const Anthropic = require('@anthropic-ai/sdk');
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const MODEL_NAME    = 'gemini-2.0-flash';
+const CLAUDE_API_KEY = process.env.CLAUDE_API_KEY;
+const MODEL_NAME    = 'claude-opus-4-5';
 
-let genAI = null;
-let model = null;
+let anthropic = null;
 
-function getModel() {
-  if (model) return model;
-  if (!GEMINI_API_KEY || GEMINI_API_KEY === 'your_gemini_api_key_here') {
-    return null;
-  }
-  genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-  model = genAI.getGenerativeModel({
-    model: MODEL_NAME,
-    generationConfig: { responseMimeType: 'application/json' },
-  });
-  return model;
+function getClient() {
+  if (anthropic) return anthropic;
+  if (!CLAUDE_API_KEY || CLAUDE_API_KEY === 'your_claude_api_key_here') return null;
+  anthropic = new Anthropic({ apiKey: CLAUDE_API_KEY });
+  return anthropic;
 }
 
-/** Call Gemini with a prompt, parse JSON response. Returns null on failure. */
-async function callGemini(prompt) {
-  const m = getModel();
-  if (!m) return null;
+/** Call Claude with a prompt, parse JSON response. Returns null on failure. */
+async function callClaude(prompt) {
+  const client = getClient();
+  if (!client) return null;
   try {
-    const result = await m.generateContent(prompt);
-    const text   = result.response.text().trim();
-    // Strip markdown code fences if present
-    const clean  = text.replace(/^```json\s*/i, '').replace(/```\s*$/, '').trim();
+    const response = await client.messages.create({
+      model: MODEL_NAME,
+      max_tokens: 512,
+      system: 'You are a JSON-only analytics API. Return ONLY valid JSON with no markdown, no explanation, no code fences.',
+      messages: [{ role: 'user', content: prompt }],
+    });
+    const text  = response.content[0]?.text?.trim() || '';
+    const clean = text.replace(/^```json\s*/i, '').replace(/```\s*$/, '').trim();
     return JSON.parse(clean);
   } catch (err) {
-    console.warn('⚠️  Gemini API error:', err.message);
+    console.warn('⚠️  Claude API error:', err.message);
     return null;
   }
 }
@@ -108,7 +105,7 @@ Return ONLY valid JSON (no markdown):
   }
 }`.trim();
 
-  const ai = await callGemini(prompt);
+  const ai = await callClaude(prompt);
   if (ai && typeof ai.predicted === 'number') {
     ai.predicted   = Math.min(Math.round(ai.predicted), venue_capacity);
     ai.confidence  = Math.max(0.60, Math.min(0.97, ai.confidence || 0.72));
@@ -187,7 +184,7 @@ Return ONLY valid JSON (no markdown):
   "insights": [<up to 2 insight strings>]
 }`.trim();
 
-  const ai = await callGemini(prompt);
+  const ai = await callClaude(prompt);
   if (ai && typeof ai.recommended_total === 'number') return ai;
   return _fallbackBudget(payload);
 }
@@ -260,7 +257,7 @@ Return ONLY valid JSON (no markdown):
   }
 }`.trim();
 
-  const ai = await callGemini(prompt);
+  const ai = await callClaude(prompt);
   if (ai && Array.isArray(ai.scores)) return ai;
   return _fallbackVolunteers(volunteers);
 }
@@ -343,7 +340,7 @@ Return ONLY valid JSON (no markdown):
   "insights": [<2-4 insight strings, specific and actionable>]
 }`.trim();
 
-  const ai = await callGemini(prompt);
+  const ai = await callClaude(prompt);
   if (ai && typeof ai.engagement_score === 'number') {
     ai.engagement_score = Math.max(0, Math.min(100, ai.engagement_score));
     ai.grade = _gradeScore(ai.engagement_score);
@@ -359,12 +356,12 @@ Return ONLY valid JSON (no markdown):
 // ---------------------------------------------------------------------------
 
 async function healthCheck() {
-  const hasKey = !!(GEMINI_API_KEY && GEMINI_API_KEY !== 'your_gemini_api_key_here');
+  const hasKey = !!(CLAUDE_API_KEY && CLAUDE_API_KEY !== 'your_claude_api_key_here');
   return {
     status: 'ok',
-    service: 'FestOS AI Engine (Gemini API)',
-    version: '2.0.0',
-    provider: 'Google Gemini',
+    service: 'FestOS AI Engine (Claude API)',
+    version: '3.0.0',
+    provider: 'Anthropic Claude',
     model: MODEL_NAME,
     api_key_configured: hasKey,
     fallback_mode: !hasKey,
