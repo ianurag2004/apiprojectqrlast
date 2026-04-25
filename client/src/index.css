@@ -1,0 +1,144 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { @apply scroll-smooth; }
+  body {
+    @apply bg-surface text-white font-sans antialiased;
+    background: #0D0F1A;
+  }
+  * { @apply border-white/10; }
+}
+
+@layer components {
+  /* Glass card */
+  .glass {
+    @apply bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl;
+  }
+  .glass-strong {
+    @apply bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl;
+  }
+
+  /* Buttons */
+  .btn-primary {
+    @apply bg-primary-500 hover:bg-primary-400 text-white font-semibold px-5 py-2.5 rounded-xl
+           transition-all duration-200 shadow-glow hover:shadow-glow-lg active:scale-95;
+  }
+  .btn-secondary {
+    @apply bg-white/10 hover:bg-white/20 text-white font-medium px-5 py-2.5 rounded-xl
+           border border-white/10 transition-all duration-200 active:scale-95;
+  }
+  .btn-danger {
+    @apply bg-red-500/20 hover:bg-red-500/30 text-red-400 font-medium px-5 py-2.5 rounded-xl
+           border border-red-500/30 transition-all duration-200;
+  }
+  .btn-success {
+    @apply bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 font-medium px-5 py-2.5 rounded-xl
+           border border-emerald-500/30 transition-all duration-200;
+  }
+  .btn-sm {
+    @apply px-3 py-1.5 text-sm rounded-lg;
+  }
+  .btn-icon {
+    @apply p-2 rounded-lg hover:bg-white/10 transition-colors text-white/70 hover:text-white;
+  }
+
+  /* Form inputs */
+  .input {
+    @apply bg-surface-100 border border-white/10 text-white placeholder-white/40
+           rounded-xl px-4 py-2.5 w-full focus:outline-none focus:border-primary-500
+           focus:ring-1 focus:ring-primary-500/50 transition-all duration-200;
+  }
+  .label { @apply block text-sm font-medium text-white/70 mb-1.5; }
+
+  /* Badges */
+  .badge {
+    @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold;
+  }
+  .badge-pending  { @apply bg-amber-500/20 text-amber-400 border border-amber-500/30; }
+  .badge-approved { @apply bg-emerald-500/20 text-emerald-400 border border-emerald-500/30; }
+  .badge-rejected { @apply bg-red-500/20 text-red-400 border border-red-500/30; }
+  .badge-draft    { @apply bg-white/10 text-white/60 border border-white/20; }
+  .badge-completed{ @apply bg-primary-500/20 text-primary-300 border border-primary-500/30; }
+
+  /* Scrollbar */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(124,58,237,0.3) transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar { width: 4px; }
+  .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(124,58,237,0.4); border-radius: 2px; }
+
+  /* AI pulse badge */
+  .ai-badge {
+    @apply relative inline-flex items-center gap-1.5 bg-primary-500/10 border border-primary-500/40
+           text-primary-300 text-xs font-semibold px-2.5 py-1 rounded-full;
+  }
+  .ai-badge::before {
+    content: '';
+    @apply w-1.5 h-1.5 bg-primary-400 rounded-full animate-pulse-slow;
+  }
+
+  /* Status dot */
+  .status-dot {
+    @apply w-2 h-2 rounded-full inline-block;
+  }
+
+  /* Page header */
+  .page-header {
+    @apply flex items-center justify-between mb-6;
+  }
+  .page-title {
+    @apply text-2xl font-display font-bold text-white;
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary-300 to-accent bg-clip-text text-transparent;
+  }
+
+  /* Table */
+  .table-wrapper {
+    @apply glass overflow-hidden;
+  }
+  table { @apply w-full; }
+  thead tr { @apply border-b border-white/10; }
+  th { @apply px-4 py-3 text-left text-xs font-semibold text-white/50 uppercase tracking-wider; }
+  td { @apply px-4 py-3 text-sm text-white/80 border-b border-white/5; }
+  tbody tr {
+    @apply hover:bg-white/5 transition-colors cursor-default;
+  }
+
+  /* Sidebar nav item */
+  .nav-item {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/60 hover:text-white
+           hover:bg-white/10 transition-all duration-200 cursor-pointer text-sm font-medium;
+  }
+  .nav-item.active {
+    @apply bg-primary-500/20 text-primary-300 border border-primary-500/30;
+  }
+
+  /* KPI Card */
+  .kpi-card {
+    @apply glass p-5 flex flex-col gap-2 hover:border-primary-500/30 transition-all duration-300
+           hover:shadow-glow cursor-default;
+  }
+
+  /* Approval step */
+  .approval-step {
+    @apply flex items-center gap-3 p-3 rounded-xl;
+  }
+  .approval-step.done   { @apply bg-emerald-500/10 border border-emerald-500/20; }
+  .approval-step.active { @apply bg-primary-500/10 border border-primary-500/30; }
+  .approval-step.waiting{ @apply bg-white/5 border border-white/10; }
+}
+
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+  .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+  .animate-slide-in { animation: slideIn 0.3s ease-out forwards; }
+}
