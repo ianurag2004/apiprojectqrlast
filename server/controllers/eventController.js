@@ -141,13 +141,29 @@ exports.submitEvent = async (req, res, next) => {
 // @route PATCH /api/events/:id/approve
 exports.approveEvent = async (req, res, next) => {
   try {
-    const { status, comment } = req.body; // status: 'approved' | 'rejected'
+    const { status, comment } = req.body;
     const event = await Event.findById(req.params.id);
     if (!event) return res.status(404).json({ success: false, message: 'Event not found' });
 
-    const roleStepMap = { hod: 0, dean: 1, finance: 2 };
     const userRole = req.user.role;
 
+    // super_admin can fully approve or reject in one step
+    if (userRole === 'super_admin') {
+      if (status === 'rejected') {
+        event.status = 'rejected';
+        event.approvalChain.forEach(s => { if (s.status === 'pending') { s.status = 'rejected'; s.user = req.user._id; s.timestamp = new Date(); s.comment = comment || ''; } });
+      } else {
+        event.status = 'approved';
+        event.registrationOpen = true;
+        event.approvalChain.forEach(s => { s.status = 'approved'; s.user = req.user._id; s.timestamp = new Date(); s.comment = comment || 'Auto-approved by admin'; });
+      }
+      await event.save();
+      req.io?.to(`event:${event._id}`).emit('approval:status', { eventId: event._id, stage: 'admin', status, comment });
+      await cacheDel('dashboard:kpis');
+      return res.json({ success: true, data: { event } });
+    }
+
+    const roleStepMap = { hod: 0, dean: 1, finance: 2 };
     if (!['hod','dean','finance'].includes(userRole))
       return res.status(403).json({ success: false, message: 'Not an approver role' });
 
@@ -176,13 +192,24 @@ exports.approveEvent = async (req, res, next) => {
     }
 
     await event.save();
-
-    req.io?.to(`event:${event._id}`).emit('approval:status', {
-      eventId: event._id, stage: userRole, status, comment,
-    });
+    req.io?.to(`event:${event._id}`).emit('approval:status', { eventId: event._id, stage: userRole, status, comment });
     await cacheDel('dashboard:kpis');
 
     res.json({ success: true, data: { event } });
+  } catch (err) { next(err); }
+};
+
+// @route PATCH /api/events/:id/registration-toggle
+exports.toggleRegistration = async (req, res, next) => {
+  try {
+    const event = await Event.findById(req.params.id);
+    if (!event) return res.status(404).json({ success: false, message: 'Event not found' });
+    if (event.status !== 'approved')
+      return res.status(400).json({ success: false, message: 'Only approved events can toggle registrations' });
+
+    event.registrationOpen = !event.registrationOpen;
+    await event.save();
+    res.json({ success: true, data: { registrationOpen: event.registrationOpen, event } });
   } catch (err) { next(err); }
 };
 

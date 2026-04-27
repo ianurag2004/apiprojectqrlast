@@ -2,13 +2,15 @@ const Registration = require('../models/Registration');
 const Event = require('../models/Event');
 const { generateQR, parseQRPayload } = require('../services/qr');
 const { cacheDel } = require('../config/redis');
+const { sendRegistrationEmail, sendCheckInEmail } = require('../services/emailService');
+const { createNotification } = require('../services/notificationService');
 
 // @route POST /api/registrations
 exports.register = async (req, res, next) => {
   try {
     const { eventId, name, email, phone, roll, department, teamName } = req.body;
 
-    const event = await Event.findById(eventId);
+    const event = await Event.findById(eventId).populate('organizer', 'name email');
     if (!event) return res.status(404).json({ success: false, message: 'Event not found' });
     if (!event.registrationOpen)
       return res.status(400).json({ success: false, message: 'Registrations are not open yet' });
@@ -33,6 +35,30 @@ exports.register = async (req, res, next) => {
     req.io?.to(`event:${eventId}`).emit('registration:new', {
       eventId, count: count + 1, name, registrationId: reg._id,
     });
+
+    // 📧 Send registration confirmation email (async, non-blocking)
+    sendRegistrationEmail({
+      to: email,
+      participantName: name,
+      eventTitle: event.title,
+      eventDate: event.date,
+      venue: event.venue,
+      qrDataUrl,
+    }).catch(err => console.error('Email send error:', err.message));
+
+    // 🔔 Notify the event organizer about new registration
+    if (event.organizer?._id) {
+      createNotification({
+        recipientId: event.organizer._id,
+        type: 'registration',
+        title: 'New Registration',
+        message: `${name} registered for ${event.title}`,
+        icon: '🎫',
+        link: `/registrations`,
+        meta: { eventId, registrationId: reg._id },
+        io: req.io,
+      }).catch(err => console.error('Notification error:', err.message));
+    }
 
     await cacheDel('dashboard:kpis');
     res.status(201).json({ success: true, data: { registration: reg } });
@@ -72,6 +98,8 @@ exports.checkIn = async (req, res, next) => {
     if (!reg) return res.status(404).json({ success: false, message: 'Registration not found' });
     if (reg.checkedIn) return res.status(400).json({ success: false, message: 'Already checked in' });
 
+    const event = await Event.findById(reg.event);
+
     reg.checkedIn = true;
     reg.checkedInAt = new Date();
     reg.checkedInBy = req.user._id;
@@ -81,6 +109,27 @@ exports.checkIn = async (req, res, next) => {
       eventId: reg.event, participantId: reg._id, name: reg.name,
       timestamp: reg.checkedInAt,
     });
+
+    // 📧 Send check-in confirmation email (async, non-blocking)
+    sendCheckInEmail({
+      to: reg.email,
+      participantName: reg.name,
+      eventTitle: event?.title || 'Event',
+    }).catch(err => console.error('Check-in email error:', err.message));
+
+    // 🔔 Notify the participant if they have an account
+    if (reg.participant) {
+      createNotification({
+        recipientId: reg.participant,
+        type: 'checkin',
+        title: 'Checked In ✅',
+        message: `You've been checked in to ${event?.title || 'the event'}. Certificate will be available after the event.`,
+        icon: '✅',
+        link: `/registrations`,
+        meta: { eventId: reg.event, registrationId: reg._id },
+        io: req.io,
+      }).catch(err => console.error('Notification error:', err.message));
+    }
 
     res.json({ success: true, data: { registration: reg } });
   } catch (err) { next(err); }
@@ -99,6 +148,8 @@ exports.scanQR = async (req, res, next) => {
     if (reg.qrToken !== token) return res.status(400).json({ success: false, message: 'QR token mismatch' });
     if (reg.checkedIn) return res.status(400).json({ success: false, message: 'Already checked in', data: { registration: reg } });
 
+    const event = await Event.findById(eventId);
+
     reg.checkedIn = true;
     reg.checkedInAt = new Date();
     reg.checkedInBy = req.user._id;
@@ -108,6 +159,13 @@ exports.scanQR = async (req, res, next) => {
       eventId, participantId: reg._id, name: reg.name,
       timestamp: reg.checkedInAt, method: 'qr',
     });
+
+    // 📧 Send check-in confirmation (async)
+    sendCheckInEmail({
+      to: reg.email,
+      participantName: reg.name,
+      eventTitle: event?.title || 'Event',
+    }).catch(err => console.error('QR check-in email error:', err.message));
 
     res.json({ success: true, message: 'Check-in successful', data: { registration: reg } });
   } catch (err) { next(err); }
@@ -127,3 +185,5 @@ exports.exportCSV = async (req, res, next) => {
     res.send(header + rows);
   } catch (err) { next(err); }
 };
+
+

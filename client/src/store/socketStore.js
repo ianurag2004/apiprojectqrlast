@@ -29,7 +29,7 @@ export const useSocketStore = create((set, get) => ({
     });
 
     // Global event listeners (add to feed)
-    ['registration:new', 'checkin:update', 'approval:status', 'volunteer:alert', 'analytics:ready']
+    ['registration:new', 'checkin:update', 'approval:status', 'volunteer:alert']
       .forEach(ev => {
         socketInstance.on(ev, (data) => {
           set(state => ({

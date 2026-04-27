@@ -1,9 +1,10 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { useSocketStore } from '../store/socketStore';
+import NotificationCenter from './NotificationCenter';
 import {
   LayoutDashboard, Calendar, FileText, DollarSign, Users,
-  BarChart3, QrCode, Settings, LogOut, Wifi, WifiOff, Zap,
+  QrCode, Settings, LogOut, Wifi, WifiOff, Zap,
   ClipboardList, UserCog,
 } from 'lucide-react';
 
@@ -13,7 +14,6 @@ const navItems = [
   { to: '/events/new',   icon: FileText,        label: 'New Proposal', roles: ['organizer','hod','super_admin'] },
   { to: '/registrations',icon: ClipboardList,   label: 'Registrations',roles: null },
   { to: '/volunteers',   icon: UserCog,         label: 'Volunteers',   roles: ['organizer','hod','super_admin'] },
-  { to: '/analytics',    icon: BarChart3,       label: 'Analytics',    roles: ['organizer','hod','dean','super_admin'] },
   { to: '/scan',         icon: QrCode,          label: 'QR Scanner',   roles: ['organizer','hod','super_admin'] },
   { to: '/admin',        icon: Settings,        label: 'Admin Panel',  roles: ['super_admin','hod','dean'] },
 ];
@@ -65,12 +65,15 @@ export default function Sidebar() {
 
       {/* User + status */}
       <div className="px-3 py-4 border-t border-white/10 space-y-3">
-        {/* Socket status */}
-        <div className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs ${
-          connected ? 'text-emerald-400 bg-emerald-500/10' : 'text-white/40 bg-white/5'
-        }`}>
-          {connected ? <Wifi size={12} /> : <WifiOff size={12} />}
-          {connected ? 'Live — Connected' : 'Offline'}
+        {/* Socket status + Notifications */}
+        <div className="flex items-center gap-2">
+          <div className={`flex-1 flex items-center gap-2 px-3 py-2 rounded-lg text-xs ${
+            connected ? 'text-emerald-400 bg-emerald-500/10' : 'text-white/40 bg-white/5'
+          }`}>
+            {connected ? <Wifi size={12} /> : <WifiOff size={12} />}
+            {connected ? 'Live' : 'Offline'}
+          </div>
+          <NotificationCenter />
         </div>
 
         {/* User card */}

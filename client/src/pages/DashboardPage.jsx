@@ -15,7 +15,6 @@ const LIVE_FEED_LABELS = {
   'checkin:update': { label: 'Check-in', color: 'text-emerald-400', dot: 'bg-emerald-500' },
   'approval:status': { label: 'Approval Update', color: 'text-amber-400', dot: 'bg-amber-500' },
   'volunteer:alert': { label: 'Volunteer Alert', color: 'text-red-400', dot: 'bg-red-500' },
-  'analytics:ready': { label: 'Analytics Ready', color: 'text-blue-400', dot: 'bg-blue-500' },
 };
 
 const defaultInsights = [
@@ -33,7 +32,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     joinAdmin();
-    api.get('/analytics/dashboard').then(res => {
+    api.get('/dashboard').then(res => {
       setKpis(res.data.data);
     }).catch(() => {}).finally(() => setLoading(false));
   }, []);

@@ -13,11 +13,11 @@ import DashboardPage from './pages/DashboardPage';
 import EventsPage from './pages/EventsPage';
 import EventDetailPage from './pages/EventDetailPage';
 import ProposalFormPage from './pages/ProposalFormPage';
-import AnalyticsPage from './pages/AnalyticsPage';
 import QRScannerPage from './pages/QRScannerPage';
 import AdminPage from './pages/AdminPage';
 import RegistrationsPage from './pages/RegistrationsPage';
 import PublicRegisterPage from './pages/PublicRegisterPage';
+import VolunteersPage from './pages/VolunteersPage';
 
 // Protected layout (sidebar + routes)
 function ProtectedLayout() {
@@ -73,8 +73,8 @@ export default function App() {
           <Route path="/events" element={<EventsPage />} />
           <Route path="/events/new" element={<ProposalFormPage />} />
           <Route path="/events/:id" element={<EventDetailPage />} />
-          <Route path="/events/:id/analytics" element={<AnalyticsPage />} />
           <Route path="/registrations" element={<RegistrationsPage />} />
+          <Route path="/volunteers" element={<VolunteersPage />} />
           <Route path="/scan" element={<QRScannerPage />} />
           <Route path="/admin" element={<AdminPage />} />
         </Route>

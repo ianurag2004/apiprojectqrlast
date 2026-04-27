@@ -10,7 +10,7 @@ import { QRCodeSVG as QRCode } from 'qrcode.react';
 import { formatDate, formatCurrency } from '../utils/dateUtils';
 import {
   Calendar, MapPin, Users, DollarSign, ChevronLeft,
-  CheckCircle, XCircle, Loader2, BarChart3, UserPlus, Download,
+  CheckCircle, XCircle, Loader2, UserPlus, Download, ToggleLeft, ToggleRight,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -81,6 +81,16 @@ export default function EventDetailPage() {
     finally { setActionLoading(false); }
   };
 
+  const handleToggleReg = async () => {
+    setActionLoading(true);
+    try {
+      const { data } = await api.patch(`/events/${id}/registration-toggle`);
+      setEvent(prev => ({ ...prev, registrationOpen: data.data.registrationOpen }));
+      toast.success(data.data.registrationOpen ? '✅ Registrations opened!' : '🔒 Registrations closed');
+    } catch (err) { toast.error(err.response?.data?.message || 'Toggle failed'); }
+    finally { setActionLoading(false); }
+  };
+
   if (loading) return <div className="flex items-center justify-center h-64"><Loader2 size={24} className="animate-spin text-primary-400" /></div>;
   if (!event) return null;
 
@@ -133,11 +143,18 @@ export default function EventDetailPage() {
                 </button>
               </div>
             )}
-            {/* Analytics */}
-            {event.status === 'completed' && (
-              <button onClick={() => navigate(`/events/${id}/analytics`)}
-                className="btn-secondary flex items-center gap-2">
-                <BarChart3 size={14} /> View Analytics
+            {/* Registration toggle for organizer/admin on approved events */}
+            {event.status === 'approved' && (isOrganizer || hasRole('super_admin','hod')) && (
+              <button onClick={handleToggleReg} disabled={actionLoading}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all border ${
+                  event.registrationOpen
+                    ? 'bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20'
+                    : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20'
+                }`}>
+                {event.registrationOpen
+                  ? <><ToggleRight size={15} /> Close Registrations</>
+                  : <><ToggleLeft size={15} /> Open Registrations</>
+                }
               </button>
             )}
           </div>

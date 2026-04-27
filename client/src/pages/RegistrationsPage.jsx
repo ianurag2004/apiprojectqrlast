@@ -3,7 +3,7 @@ import api from '../api/axios';
 import {
   Users, Search, Download, UserPlus, CheckCircle2, XCircle,
   Loader2, Calendar, ChevronDown, QrCode, Filter, RefreshCw,
-  ClipboardList, BadgeCheck, Clock, Hash, X, ExternalLink,
+  ClipboardList, BadgeCheck, Clock, Hash, X, ExternalLink, Award,
 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { useSocketStore } from '../store/socketStore';
@@ -183,6 +183,26 @@ export default function RegistrationsPage() {
       `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/registrations/event/${selectedEvent._id}/export`,
       '_blank'
     );
+  };
+
+  /* Certificate download */
+  const [downloadingCert, setDownloadingCert] = useState(null);
+  const handleDownloadCert = async (regId) => {
+    setDownloadingCert(regId);
+    try {
+      const response = await api.get(`/certificates/${regId}`, { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Certificate_${selectedEvent?.title || 'Event'}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      toast.success('Certificate downloaded!');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Could not download certificate');
+    } finally { setDownloadingCert(null); }
   };
 
   /* Show event registration QR */
@@ -463,9 +483,23 @@ export default function RegistrationsPage() {
                                 Check In
                               </button>
                             ) : (
+                              <>
                               <span className="flex items-center gap-1 text-xs text-white/20">
                                 <XCircle size={11} /> Done
                               </span>
+                              <button
+                                onClick={() => handleDownloadCert(r._id)}
+                                disabled={downloadingCert === r._id}
+                                className="flex items-center gap-1.5 px-2.5 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 rounded-lg text-xs font-medium transition-all mt-1"
+                                title="Download Certificate"
+                              >
+                                {downloadingCert === r._id
+                                  ? <Loader2 size={11} className="animate-spin" />
+                                  : <Award size={11} />
+                                }
+                                Certificate
+                              </button>
+                              </>
                             )}
                           </td>
                         )}

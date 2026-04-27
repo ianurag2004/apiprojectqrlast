@@ -18,9 +18,11 @@ const eventRoutes = require('./routes/events');
 const budgetRoutes = require('./routes/budgets');
 const registrationRoutes = require('./routes/registrations');
 const volunteerRoutes = require('./routes/volunteers');
-const analyticsRoutes = require('./routes/analytics');
 const aiRoutes = require('./routes/ai');
 const paymentRoutes = require('./routes/payments');
+const notificationRoutes = require('./routes/notifications');
+const certificateRoutes = require('./routes/certificates');
+const dashboardRoutes = require('./routes/dashboard');
 
 const app = express();
 const httpServer = http.createServer(app);
@@ -74,9 +76,11 @@ app.use('/api/events', eventRoutes);
 app.use('/api/budgets', budgetRoutes);
 app.use('/api/registrations', registrationRoutes);
 app.use('/api/volunteers', volunteerRoutes);
-app.use('/api/analytics', analyticsRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/certificates', certificateRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

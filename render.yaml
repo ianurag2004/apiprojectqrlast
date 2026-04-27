@@ -23,6 +23,14 @@ services:
       - key: RAZORPAY_KEY_SECRET
         sync: false
       - key: REG_FEE_PAISE
-        sync: false
+        value: "0"
       - key: CLIENT_URL
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
         sync: false
