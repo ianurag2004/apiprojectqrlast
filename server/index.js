@@ -30,13 +30,15 @@ const httpServer = http.createServer(app);
 // Socket.io setup
 // Allow any localhost Vite dev port (5173-5179) in development
 const allowedOrigins = process.env.NODE_ENV === 'production'
-  ? [process.env.CLIENT_URL]
+  ? [
+      process.env.CLIENT_URL,
+      'https://apiprojectqrlast1.vercel.app',
+      'https://apiprojectqrlast-git-main-ianurag101-7414s-projects.vercel.app',
+    ].filter(Boolean)
   : [
       'http://localhost:5173',
       'http://localhost:5174',
       'http://localhost:5175',
-      'http://localhost:5176',
-      'http://localhost:5177',
       process.env.CLIENT_URL,
     ].filter(Boolean);
 
