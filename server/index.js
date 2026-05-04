@@ -33,6 +33,7 @@ const httpServer = http.createServer(app);
 const allowedOrigins = process.env.NODE_ENV === 'production'
   ? [
       process.env.CLIENT_URL,
+      'https://festos-app.vercel.app',
       'https://apiprojectqrlast1.vercel.app',
       'https://apiprojectqrlast-git-main-ianurag101-7414s-projects.vercel.app',
     ].filter(Boolean)
@@ -105,12 +106,15 @@ app.use((req, res) => {
 // Global error handler
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 5000;
-httpServer.listen(PORT, () => {
-  console.log(`\n🎉 FestOS Server running on port ${PORT}`);
-  console.log(`📡 Socket.io enabled`);
-  console.log(`🌐 API: http://localhost:${PORT}/api`);
-  console.log(`🏥 Health: http://localhost:${PORT}/api/health\n`);
-});
+// Only start listener when NOT running as a Vercel serverless function
+if (!process.env.VERCEL) {
+  const PORT = process.env.PORT || 5000;
+  httpServer.listen(PORT, () => {
+    console.log(`\n🎉 FestOS Server running on port ${PORT}`);
+    console.log(`📡 Socket.io enabled`);
+    console.log(`🌐 API: http://localhost:${PORT}/api`);
+    console.log(`🏥 Health: http://localhost:${PORT}/api/health\n`);
+  });
+}
 
 module.exports = { app, io };
