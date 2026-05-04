@@ -1,11 +1,12 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { useSocketStore } from '../store/socketStore';
+import { useChatStore } from '../store/chatStore';
 import NotificationCenter from './NotificationCenter';
 import {
   LayoutDashboard, Calendar, FileText, DollarSign, Users,
   QrCode, Settings, LogOut, Wifi, WifiOff, Zap,
-  ClipboardList, UserCog,
+  ClipboardList, UserCog, MessageSquare,
 } from 'lucide-react';
 
 const navItems = [
@@ -14,6 +15,7 @@ const navItems = [
   { to: '/events/new',   icon: FileText,        label: 'New Proposal', roles: ['organizer','hod','super_admin'] },
   { to: '/registrations',icon: ClipboardList,   label: 'Registrations',roles: null },
   { to: '/volunteers',   icon: UserCog,         label: 'Volunteers',   roles: ['organizer','hod','super_admin'] },
+  { to: '/messages',     icon: MessageSquare,   label: 'Messages',     roles: null },
   { to: '/scan',         icon: QrCode,          label: 'QR Scanner',   roles: ['organizer','hod','super_admin'] },
   { to: '/admin',        icon: Settings,        label: 'Admin Panel',  roles: ['super_admin','hod','dean'] },
 ];
@@ -21,7 +23,9 @@ const navItems = [
 export default function Sidebar() {
   const { user, logout, hasRole } = useAuthStore();
   const { connected } = useSocketStore();
+  const { unreadCounts } = useChatStore();
   const navigate = useNavigate();
+  const totalUnread = Object.values(unreadCounts).reduce((a, b) => a + b, 0);
 
   const handleLogout = async () => {
     await logout();
@@ -57,7 +61,14 @@ export default function Sidebar() {
             to={to}
             className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
           >
-            <Icon size={16} />
+            <div className="relative">
+              <Icon size={16} />
+              {to === '/messages' && totalUnread > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 min-w-[14px] h-[14px] bg-violet-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center px-0.5">
+                  {totalUnread > 9 ? '9+' : totalUnread}
+                </span>
+              )}
+            </div>
             <span>{label}</span>
           </NavLink>
         ))}

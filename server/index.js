@@ -23,6 +23,7 @@ const paymentRoutes = require('./routes/payments');
 const notificationRoutes = require('./routes/notifications');
 const certificateRoutes = require('./routes/certificates');
 const dashboardRoutes = require('./routes/dashboard');
+const messageRoutes = require('./routes/messages');
 
 const app = express();
 const httpServer = http.createServer(app);
@@ -83,6 +84,7 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/certificates', certificateRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/messages', messageRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

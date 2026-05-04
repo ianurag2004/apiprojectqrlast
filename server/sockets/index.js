@@ -8,7 +8,7 @@ const initSockets = (io) => {
   io.on('connection', (socket) => {
     console.log(`🔌 Socket connected: ${socket.id}`);
 
-    // Auto-join user's personal room for notification delivery
+    // Auto-join user's personal room for notification + DM delivery
     const token = socket.handshake.auth?.token;
     if (token) {
       try {
@@ -36,10 +36,39 @@ const initSockets = (io) => {
       socket.join('admin');
     });
 
+    // ── Chat rooms ──────────────────────────────────────────────────────────
+    // Join the global group chat room
+    socket.on('join:group-chat', () => {
+      socket.join('chat:group');
+      console.log(`   ↳ Joined chat:group`);
+    });
+
+    // Leave the global group chat room
+    socket.on('leave:group-chat', () => {
+      socket.leave('chat:group');
+    });
+
+    // Real-time group message relay (message already persisted via REST)
+    socket.on('chat:group:send', (msg) => {
+      io.to('chat:group').emit('chat:group:message', msg);
+    });
+
+    // Real-time DM relay — deliver to both sender and recipient personal rooms
+    socket.on('chat:dm:send', (msg) => {
+      // msg should contain { recipientId, ... }
+      if (msg?.recipientId) {
+        io.to(`user:${msg.recipientId}`).emit('chat:dm:message', msg);
+        // Also echo back to sender's own room so other tabs stay in sync
+        if (socket.userId) {
+          io.to(`user:${socket.userId}`).emit('chat:dm:message', msg);
+        }
+      }
+    });
+    // ── End Chat ────────────────────────────────────────────────────────────
+
     // Organizer emits manual check-in from frontend scanner
     socket.on('client:checkin', async (data) => {
       // data: { eventId, registrationId, token }
-      // Server validates and emits back to room
       io.to(`event:${data.eventId}`).emit('checkin:update', {
         eventId: data.eventId,
         participantId: data.registrationId,

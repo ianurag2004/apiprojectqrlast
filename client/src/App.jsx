@@ -3,6 +3,7 @@ import { Toaster } from 'react-hot-toast';
 import { useEffect } from 'react';
 import { useAuthStore } from './store/authStore';
 import { useSocketStore } from './store/socketStore';
+import { useChatStore } from './store/chatStore';
 import Sidebar from './components/Sidebar';
 import ChatBot from './components/ChatBot';
 
@@ -18,6 +19,7 @@ import AdminPage from './pages/AdminPage';
 import RegistrationsPage from './pages/RegistrationsPage';
 import PublicRegisterPage from './pages/PublicRegisterPage';
 import VolunteersPage from './pages/VolunteersPage';
+import MessagesPage from './pages/MessagesPage';
 
 // Protected layout (sidebar + routes)
 function ProtectedLayout() {
@@ -37,11 +39,13 @@ function ProtectedLayout() {
 export default function App() {
   const { isAuthenticated, fetchMe } = useAuthStore();
   const { connect } = useSocketStore();
+  const { fetchUnread } = useChatStore();
 
   useEffect(() => {
     if (isAuthenticated) {
       fetchMe();
       connect();
+      fetchUnread();
     }
   }, []);
 
@@ -75,6 +79,7 @@ export default function App() {
           <Route path="/events/:id" element={<EventDetailPage />} />
           <Route path="/registrations" element={<RegistrationsPage />} />
           <Route path="/volunteers" element={<VolunteersPage />} />
+          <Route path="/messages" element={<MessagesPage />} />
           <Route path="/scan" element={<QRScannerPage />} />
           <Route path="/admin" element={<AdminPage />} />
         </Route>
