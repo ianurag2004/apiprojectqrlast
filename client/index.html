@@ -4,10 +4,22 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>client</title>
+    <title>FestOS — Manav Rachna University Event Management</title>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+
+    <!-- Botpress Webchat -->
+    <script src="https://cdn.botpress.cloud/webchat/v3.6/inject.js"></script>
+    <script>
+      window.botpress.init({
+        "botId": "c928eeed-d35d-49a7-b02a-405ea03370fb",
+        "clientId": "0154f7c4-130d-46f2-b0dd-34d5965aec2d",
+        "hostUrl": "https://cdn.botpress.cloud/webchat/v3.6",
+        "messagingUrl": "https://messaging.botpress.cloud",
+        "configUrl": "https://files.bpcontent.cloud/2026/05/07/11/20260507114659-NIVL58VT.json"
+      });
+    </script>
   </body>
 </html>

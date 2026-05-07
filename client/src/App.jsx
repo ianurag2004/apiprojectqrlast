@@ -5,7 +5,7 @@ import { useAuthStore } from './store/authStore';
 import { useSocketStore } from './store/socketStore';
 import { useChatStore } from './store/chatStore';
 import Sidebar from './components/Sidebar';
-import ChatBot from './components/ChatBot';
+
 
 // Pages
 import LoginPage from './pages/LoginPage';
@@ -31,7 +31,6 @@ function ProtectedLayout() {
       <main className="flex-1 ml-60 p-6 max-w-[1200px]">
         <Outlet />
       </main>
-      <ChatBot />
     </div>
   );
 }
